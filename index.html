@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Atlas del Ser</title>
+
+<style>
+body{
+margin:0;
+background:radial-gradient(circle,#02020a,#000);
+color:white;
+font-family:Arial;
+overflow:hidden;
+}
+
+#ui{
+position:absolute;
+top:10px;
+left:10px;
+z-index:10;
+}
+
+textarea{
+width:320px;
+height:70px;
+}
+
+.panel{
+position:absolute;
+right:10px;
+width:380px;
+background:rgba(0,0,0,0.75);
+padding:12px;
+border-radius:10px;
+}
+
+#lectura{top:180px;}
+#profunda{top:360px;}
+
+canvas{display:block;}
+</style>
+</head>
+
+<body>
+
+<div id="ui">
+<textarea id="sueno" placeholder="Escribe tu sueño"></textarea><br>
+<button onclick="registrar()">Registrar</button>
+</div>
+
+<div class="panel">
+<strong>Exploración:</strong>
+<div id="info">Haz clic en una estrella</div>
+</div>
+
+<div id="lectura" class="panel">
+<strong>Lectura general:</strong>
+<div id="textoLectura"></div>
+</div>
+
+<div id="profunda" class="panel">
+<strong>Lectura profunda:</strong>
+<div id="textoProfundo"></div>
+</div>
+
+<canvas id="c"></canvas>
+
+<script>
+
+// ================= SIMBOLOS =================
+
+let simbolos = [
+"agua","rio","arbol","angel","fuego",
+"luna","sombra","maiz","tierra","serpiente"
+]
+
+// ================= DICCIONARIO PROFUNDO =================
+
+let diccionario = {
+
+agua: "El agua suele aparecer cuando hay emociones en movimiento. Puede hablar de algo que se siente pero no siempre se expresa.",
+
+rio: "El río representa un proceso. Algo en tu vida está avanzando o cambiando.",
+
+arbol: "El árbol conecta con crecimiento y raíz. Algo en ti está madurando.",
+
+angel: "El ángel puede representar guía o necesidad de orientación.",
+
+fuego: "El fuego habla de transformación. Algo está cambiando con intensidad.",
+
+luna: "La luna refleja ciclos emocionales y momentos de sensibilidad.",
+
+sombra: "La sombra muestra aspectos que aún no se reconocen del todo.",
+
+maiz: "El maíz simboliza el origen del ser humano en la tradición latinoamericana.",
+
+tierra: "La tierra habla de estabilidad, raíz y lo que sostiene.",
+
+serpiente: "La serpiente representa transformación profunda."
+}
+
+// ================= CANVAS =================
+
+let canvas = document.getElementById("c")
+let ctx = canvas.getContext("2d")
+
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
+let estrellas = simbolos.map(s => ({
+nombre:s,
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+dx:(Math.random()-0.5)*0.4,
+dy:(Math.random()-0.5)*0.4
+}))
+
+// ================= DETECCION =================
+
+function detectar(texto){
+texto = texto.toLowerCase()
+return simbolos.filter(s => texto.includes(s))
+}
+
+// ================= REGISTRAR =================
+
+function registrar(){
+
+let texto = document.getElementById("sueno").value
+if(!texto) return
+
+let lista = detectar(texto)
+
+lecturaGeneral(lista)
+lecturaProfunda(lista)
+
+document.getElementById("sueno").value = ""
+}
+
+// ================= LECTURA GENERAL =================
+
+function lecturaGeneral(lista){
+
+let txt = ""
+
+if(lista.includes("agua")) txt += "Hay emociones en movimiento. "
+if(lista.includes("rio")) txt += "Hay un proceso en curso. "
+if(lista.includes("arbol")) txt += "Se percibe crecimiento. "
+
+if(txt === "") txt = "El sueño aún no muestra elementos claros."
+
+document.getElementById("textoLectura").innerText = txt
+}
+
+// ================= LECTURA PROFUNDA =================
+
+function lecturaProfunda(lista){
+
+let txt = ""
+
+if(lista.length > 1){
+txt += "Los símbolos aparecen combinados, lo que sugiere un proceso más complejo. "
+}
+
+if(lista.includes("sombra")){
+txt += "Podrían existir aspectos no del todo reconocidos. "
+}
+
+if(lista.includes("maiz")){
+txt += "Hay conexión con lo esencial y el origen. "
+}
+
+if(txt === ""){
+txt = "El contenido simbólico aún es abierto."
+}
+
+document.getElementById("textoProfundo").innerText = txt + " Esta lectura no reemplaza tu propia interpretación."
+}
+
+// ================= CLICK EN ESTRELLAS =================
+
+canvas.onclick = function(e){
+
+let rect = canvas.getBoundingClientRect()
+let x = e.clientX - rect.left
+let y = e.clientY - rect.top
+
+estrellas.forEach(s => {
+
+let dx = x - s.x
+let dy = y - s.y
+
+if(Math.sqrt(dx*dx + dy*dy) < 10){
+
+let texto = diccionario[s.nombre] || "Este símbolo aún no tiene interpretación."
+
+document.getElementById("info").innerText = s.nombre + ": " + texto
+
+}
+
+})
+
+}
+
+// ================= ANIMACION =================
+
+function draw(){
+
+ctx.fillStyle = "black"
+ctx.fillRect(0,0,canvas.width,canvas.height)
+
+estrellas.forEach(s => {
+
+s.x += s.dx
+s.y += s.dy
+
+if(s.x < 0 || s.x > canvas.width) s.dx *= -1
+if(s.y < 0 || s.y > canvas.height) s.dy *= -1
+
+ctx.beginPath()
+ctx.fillStyle = "white"
+ctx.arc(s.x,s.y,4,0,Math.PI*2)
+ctx.fill()
+
+})
+
+requestAnimationFrame(draw)
+}
+
+draw()
+
+</script>
+
+</body>
+</html>
